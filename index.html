@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Länderfinanzausgleich Deutschland</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+  h1 { text-align: center; margin-bottom: 6px; font-size: 1.4rem; color: #fff; }
+  p.subtitle { text-align: center; color: #aaa; font-size: 0.85rem; margin-bottom: 20px; }
+  .chart-container { background: #16213e; border-radius: 12px; padding: 20px 20px 20px 20px; max-width: 1400px; margin: 0 auto; }
+  .legend-hint { text-align: center; margin-top: 16px; font-size: 0.78rem; color: #888; }
+  .legend-hint .red { color: #ff6b6b; }
+  .legend-hint .green { color: #51cf66; }
+  .chart-wrapper { position: relative; }
+  #fsBtn {
+    position: absolute; top: 8px; right: 8px; z-index: 10;
+    background: #0f3460cc; border: 1px solid #ffffff30; color: #ccc;
+    border-radius: 6px; padding: 5px 9px; cursor: pointer; font-size: 16px;
+    transition: background 0.2s;
+  }
+  #fsBtn:hover { background: #1a4a90cc; color: #fff; }
+  /* Fullscreen styles */
+  .chart-container:fullscreen,
+  .chart-container:-webkit-full-screen {
+    background: #16213e;
+    padding: 20px 20px 10px 20px;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    border-radius: 0;
+  }
+  .chart-container:fullscreen .chart-wrapper,
+  .chart-container:-webkit-full-screen .chart-wrapper {
+    flex: 1;
+    min-height: 0;
+  }
+  .chart-container:fullscreen #chartDiv,
+  .chart-container:-webkit-full-screen #chartDiv {
+    height: 100% !important;
+  }
+  .totals { max-width: 1400px; margin: 28px auto 10px; display: flex; gap: 24px; flex-wrap: wrap; }
+  .totals-col { flex: 1; min-width: 260px; background: #0f3460; border-radius: 10px; padding: 16px 20px; }
+  .totals-col h3 { font-size: 0.9rem; margin-bottom: 12px; letter-spacing: 0.04em; }
+  .totals-col h3.geber { color: #51cf66; }
+  .totals-col h3.nehmer { color: #ff6b6b; }
+  .totals-col ul { list-style: none; }
+  .totals-col ul li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #ffffff10; font-size: 0.85rem; }
+  .totals-col ul li:last-child { border-bottom: none; font-weight: bold; margin-top: 4px; }
+  .val-green { color: #51cf66; }
+  .val-red { color: #ff6b6b; }
+</style>
+</head>
+<body>
+<div class="chart-container">
+  <h1>Länderfinanzausgleich Deutschland 1950–2024</h1>
+  <p class="subtitle">Zahlungen in Mio. € (bis 1994 nur Westdeutschland)</p>
+  <div class="chart-wrapper">
+    <button id="fsBtn" title="Vollbild">⛶</button>
+    <div id="chartDiv" style="position:relative; height:860px;">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+  <div class="legend-hint">
+    <span class="red">■ Nehmerländer (positive Werte / Empfänger)</span>
+    &nbsp;&nbsp;
+    <span class="green">■ Geberländer (negative Werte / Zahler)</span>
+    &nbsp;&nbsp;
+    <span style="color:#888">— Strichmuster &amp; Farbnuancen unterscheiden die Länder innerhalb jeder Gruppe</span>
+  </div>
+</div>
+
+<div class="totals">
+  <div class="totals-col">
+    <h3 class="geber">🟢 Geberländer – Gesamtsumme (Mio. €)</h3>
+    <ul>
+      <li><span>Baden-Württemberg (BW)</span><span class="val-green">−92.143</span></li>
+      <li><span>Bayern (BY)</span><span class="val-green">−124.040</span></li>
+      <li><span>Hamburg (HH)</span><span class="val-green">−14.972</span></li>
+      <li><span>Hessen (HE)</span><span class="val-green">−77.012</span></li>
+      <li><span>Nordrhein-Westfalen (NW)</span><span class="val-green">−6.385</span></li>
+      <li><span>Summe Geber</span><span class="val-green">−314.552</span></li>
+    </ul>
+  </div>
+  <div class="totals-col">
+    <h3 class="nehmer">🔴 Nehmerländer – Gesamtsumme (Mio. €)</h3>
+    <ul>
+      <li><span>Berlin (BE)</span><span class="val-red">+94.327</span></li>
+      <li><span>Brandenburg (BB)</span><span class="val-red">+20.296</span></li>
+      <li><span>Bremen (HB)</span><span class="val-red">+19.878</span></li>
+      <li><span>Mecklenburg-Vorpommern (MV)</span><span class="val-red">+18.032</span></li>
+      <li><span>Niedersachsen (NI)</span><span class="val-red">+34.446</span></li>
+      <li><span>Rheinland-Pfalz (RP)</span><span class="val-red">+14.188</span></li>
+      <li><span>Saarland (SL)</span><span class="val-red">+10.574</span></li>
+      <li><span>Sachsen (SN)</span><span class="val-red">+41.786</span></li>
+      <li><span>Sachsen-Anhalt (ST)</span><span class="val-red">+24.115</span></li>
+      <li><span>Schleswig-Holstein (SH)</span><span class="val-red">+12.010</span></li>
+      <li><span>Thüringen (TH)</span><span class="val-red">+23.762</span></li>
+      <li><span>Summe Nehmer</span><span class="val-red">+313.414</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Datentabelle ──────────────────────────────────────────────────────── -->
+<style>
+  .data-table-wrap { max-width: 1400px; margin: 32px auto 40px; }
+  .data-table-wrap h2 { font-size: 1rem; color: #ccc; margin-bottom: 6px; }
+  .table-note { font-size: 0.75rem; color: #888; margin-bottom: 12px; }
+  .table-note a { color: #74b9ff; }
+  .table-scroll { overflow-x: auto; border-radius: 10px; }
+  #dataTable { border-collapse: collapse; width: 100%; font-size: 0.78rem; background: #16213e; }
+  #dataTable thead th { position: sticky; top: 0; z-index: 2; background: #0f3460; padding: 8px 6px; text-align: center; border-bottom: 2px solid #ffffff20; white-space: nowrap; }
+  #dataTable thead th:first-child { position: sticky; left: 0; z-index: 3; background: #0f3460; }
+  #dataTable th.geber { color: #51cf66; }
+  #dataTable th.nehmer { color: #ff6b6b; }
+  #dataTable tbody tr:nth-child(even) { background: #1a2a4a; }
+  #dataTable tbody tr:hover { background: #1e3a5f; }
+  #dataTable td { padding: 5px 7px; text-align: right; border-bottom: 1px solid #ffffff08; white-space: nowrap; }
+  #dataTable td:first-child { position: sticky; left: 0; background: inherit; text-align: left; font-weight: bold; color: #aaa; padding-left: 10px; min-width: 52px; }
+  #dataTable tbody tr:nth-child(even) td:first-child { background: #1a2a4a; }
+  #dataTable tbody tr:hover td:first-child { background: #1e3a5f; }
+  #dataTable td.geber { color: #51cf66; }
+  #dataTable td.nehmer { color: #ff6b6b; }
+  #dataTable td.neu { color: #888; font-style: italic; }
+  #dataTable td.zero { color: #888; }
+  #dataTable td.num { font-variant-numeric: tabular-nums; }
+  #dataTable tfoot tr { background: #0a2040 !important; border-top: 2px solid #ffffff30; }
+  #dataTable tfoot td { color: #fff; font-weight: bold; padding: 8px 7px; }
+  #dataTable tfoot td:first-child { background: #0a2040; }
+  #dataTable tfoot td.geber { color: #51cf66; }
+  #dataTable tfoot td.nehmer { color: #ff6b6b; }
+</style>
+
+<div class="data-table-wrap">
+  <h2>📋 Datentabelle: Länderfinanzausgleich im engeren Sinne (Mio. €)</h2>
+  <p class="table-note">Negative Werte = Zahler (Geberland) &nbsp;·&nbsp; Positive Werte = Empfänger (Nehmerland) &nbsp;·&nbsp; ./. = nicht im System &nbsp;·&nbsp;
+  Quelle: <a href="https://de.wikipedia.org/wiki/L%C3%A4nderfinanzausgleich" target="_blank">Wikipedia / Bundesfinanzministerium</a></p>
+  <div class="table-scroll">
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Jahr</th>
+          <th class="geber">BW<br><small>Baden-Württ.</small></th>
+          <th class="geber">BY<br><small>Bayern</small></th>
+          <th class="geber">HH<br><small>Hamburg</small></th>
+          <th class="geber">HE<br><small>Hessen</small></th>
+          <th class="geber">NW<br><small>NRW</small></th>
+          <th class="nehmer">BE<br><small>Berlin</small></th>
+          <th class="nehmer">BB<br><small>Brandenburg</small></th>
+          <th class="nehmer">HB<br><small>Bremen</small></th>
+          <th class="nehmer">MV<br><small>Mecklenb.-V.</small></th>
+          <th class="nehmer">NI<br><small>Niedersachs.</small></th>
+          <th class="nehmer">RP<br><small>Rheinl.-Pfalz</small></th>
+          <th class="nehmer">SL<br><small>Saarland</small></th>
+          <th class="nehmer">SN<br><small>Sachsen</small></th>
+          <th class="nehmer">ST<br><small>Sachsen-Anh.</small></th>
+          <th class="nehmer">SH<br><small>Schleswig-H.</small></th>
+          <th class="nehmer">TH<br><small>Thüringen</small></th>
+          <th>Volumen<br><small>±</small></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+      <tfoot>
+        <tr>
+          <td><strong>Summe</strong></td>
+          <td class="geber num">−92.143</td>
+          <td class="geber num">−124.040</td>
+          <td class="geber num">−14.972</td>
+          <td class="geber num">−77.012</td>
+          <td class="geber num">−6.385</td>
+          <td class="nehmer num">+94.327</td>
+          <td class="nehmer num">+20.296</td>
+          <td class="nehmer num">+19.878</td>
+          <td class="nehmer num">+18.032</td>
+          <td class="nehmer num">+34.446</td>
+          <td class="nehmer num">+14.188</td>
+          <td class="nehmer num">+10.574</td>
+          <td class="nehmer num">+41.786</td>
+          <td class="nehmer num">+24.115</td>
+          <td class="nehmer num">+12.010</td>
+          <td class="nehmer num">+23.762</td>
+          <td class="num">± 627.966</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<script>
+const years = [1950,1951,1952,1953,1954,1955,1956,1957,1958,1959,1960,1961,1962,1963,1964,1965,1966,1967,1968,1969,1970,1971,1972,1973,1974,1975,1976,1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+
+const stateDefs = [
+  // ── GEBERLÄNDER – green shades, varied dashes ──────────────────────────────
+  { key:'BW', label:'Baden-Württ.',        color:'#51cf66', dash:[],           start:1950, values:[-33,-16,-23,-40,-41,-59,-72,-89,-61,-76,-55,-98,-141,-154,-183,-188,-222,-239,-220,-317,-161,-194,-303,-302,-260,-338,-368,-541,-556,-581,-769,-838,-915,-730,-747,-738,-891,-978,-982,-722,-1264,-1282,-770,-518,-210,-1433,-1289,-1232,-1778,-1760,-1957,-2115,-1663,-2169,-2170,-2235,-2057,-2316,-2499,-1488,-1709,-1779,-2765,-2415,-2356,-2313,-2538,-2773,-3079,-2436,-3674,-4015,-4473,-4495,-5038] },
+  { key:'BY', label:'Bayern',              color:'#2ecc71', dash:[8,4],         start:1950, values:[18,7,8,14,20,52,56,71,113,119,95,112,117,99,119,97,72,62,51,119,76,102,91,85,177,188,170,204,153,168,206,137,83,69,21,14,25,0,0,-33,-18,-2,28,-6,-342,-1295,-1463,-1586,-1486,-1635,-1884,-2277,-2047,-1859,-2315,-2234,-2093,-2311,-2923,-3354,-3511,-3663,-3797,-4307,-4852,-5449,-5821,-5905,-6672,-6701,-7771,-9044,-9865,-9130,-9774] },
+  { key:'HH', label:'Hamburg',             color:'#00b894', dash:[4,4],         start:1950, values:[-17,-19,-21,-11,-17,-67,-82,-102,-136,-163,-113,-170,-193,-199,-184,-165,-181,-216,-246,-353,-150,-176,-158,-169,-260,-278,-277,-316,-299,-426,-160,-218,-220,-197,-151,-208,-101,-30,0,-6,-4,-34,0,58,31,-60,-246,-140,-314,-345,-556,-268,-197,-656,-578,-383,-623,-368,-371,-45,-66,-62,-25,88,-55,-111,64,-49,-83,-120,-172,-230,-814,-934,-106] },
+  { key:'HE', label:'Hessen',              color:'#00cec9', dash:[10,3,2,3],    start:1950, values:[-14,-10,0,0,0,-5,0,-24,-37,-29,-35,-79,-98,-117,-159,-185,-210,-215,-224,-319,-148,-100,-158,-186,-164,-105,-98,-132,-241,-265,-152,-183,-143,-170,-294,-370,-400,-628,-736,-985,-739,-682,-942,-1094,-935,-1101,-1657,-1610,-1758,-2433,-2734,-2629,-1910,-1876,-1529,-1606,-2418,-2885,-2470,-1902,-1752,-1804,-1304,-1702,-1755,-1720,-2261,-2471,-1613,-1905,-2531,-3556,-3250,-3444,-3736] },
+  { key:'NW', label:'Nordrhein-Westf.',    color:'#55efc4', dash:[3,3],         start:1950, values:[-65,-43,-69,-74,-77,-139,-169,-182,-249,-256,-265,-385,-370,-269,-252,-276,-208,-216,-190,-249,-162,-188,-176,-174,-293,-222,-258,-183,-62,0,-39,0,0,0,0,46,0,85,15,-51,-32,-4,-2,16,80,-1763,-1598,-1564,-1583,-1318,-1141,-278,-1628,-50,-213,-490,-132,-38,54,-59,354,224,435,691,897,1021,1107,1232,1015,1041,-624,199,1241,1212,847] },
+  // ── NEHMERLÄNDER – red/orange/pink shades, varied dashes ──────────────────
+  { key:'BE', label:'Berlin',              color:'#ff6b6b', dash:[],            start:1995, values:[2159,2217,2266,2501,2725,2812,2653,2677,2639,2703,2456,2709,2900,3139,2877,2900,3043,3224,3328,3491,3613,3919,4232,4404,4330,3454,3602,3609,3805,3943] },
+  { key:'BB', label:'Brandenburg',         color:'#e17055', dash:[6,3],         start:1995, values:[442,529,504,534,587,644,498,541,502,534,588,611,675,621,501,401,440,543,518,510,494,543,607,550,555,1139,1370,1452,1423,1442] },
+  { key:'HB', label:'Bremen',              color:'#fd79a8', dash:[4,4],         start:1950, values:[0,0,0,0,0,-6,-18,-8,-6,-1,0,0,0,0,0,6,5,-2,-1,-7,46,26,37,36,28,23,26,74,79,120,91,82,122,134,159,170,228,258,262,322,327,301,262,325,291,287,325,179,466,340,442,402,407,346,331,366,417,471,505,433,445,516,521,588,604,626,694,692,740,771,712,832,888,771,925] },
+  { key:'MV', label:'Mecklenb.-Vorp.',     color:'#fab1a0', dash:[10,3,2,3],    start:1995, values:[394,438,431,448,464,500,434,439,392,403,434,475,513,538,450,399,429,453,461,463,472,493,524,538,517,1177,1325,1447,1431,1428] },
+  { key:'NI', label:'Niedersachsen',       color:'#ff7675', dash:[8,3,3,3],     start:1950, values:[41,13,29,31,37,65,92,107,136,132,133,228,251,204,220,260,256,347,313,454,208,230,312,347,380,367,393,475,453,512,385,515,577,360,427,423,437,570,807,856,985,898,661,510,490,231,283,344,403,532,568,952,487,393,446,363,240,318,317,110,259,204,178,107,276,418,681,684,831,776,1471,1911,1789,1568,1537] },
+  { key:'RP', label:'Rheinland-Pfalz',     color:'#d63031', dash:[3,3],         start:1950, values:[18,15,17,10,9,47,61,89,115,143,131,170,178,182,166,165,180,172,185,250,117,122,149,127,153,150,174,147,182,149,126,155,142,131,145,191,194,244,159,155,250,301,338,398,336,117,118,151,219,195,392,229,419,259,190,294,346,343,374,293,267,234,256,242,288,349,388,389,418,308,334,-286,-107,-320,524] },
+  { key:'SL', label:'Saarland',            color:'#e84393', dash:[5,2,2,2],     start:1961, values:[65,74,83,90,107,113,119,131,155,73,73,80,94,100,91,100,108,110,117,147,133,134,156,170,184,195,172,170,168,187,195,219,215,222,92,120,104,117,153,167,146,139,107,116,113,115,125,116,93,89,120,94,137,144,151,174,200,194,179,411,514,577,587,630] },
+  { key:'SN', label:'Sachsen',             color:'#c0392b', dash:[12,4],        start:1995, values:[907,1005,981,1020,1122,1182,1031,1047,936,930,1020,1078,1165,1158,910,854,918,961,995,1034,1022,1089,1180,1180,1176,2708,3225,3304,3398,3252] },
+  { key:'ST', label:'Sachsen-Anhalt',      color:'#ff4757', dash:[6,2,2,2,2,2], start:1995, values:[574,635,601,617,672,711,591,607,520,532,587,590,627,627,514,497,540,550,559,585,596,645,549,676,652,1619,1978,1986,1839,1816] },
+  { key:'SH', label:'Schleswig-Holst.',    color:'#ff9f43', dash:[2,2],         start:1950, values:[53,52,59,71,69,113,131,140,124,130,109,156,182,172,182,179,195,190,201,266,102,106,126,141,139,122,138,165,181,205,165,216,219,249,268,288,314,306,305,296,308,308,206,95,37,-72,8,-3,0,89,185,60,112,16,102,146,124,136,177,169,101,115,134,168,172,247,226,244,235,230,172,316,299,357,267] },
+  { key:'TH', label:'Thüringen',           color:'#ffeaa7', dash:[8,2,8,2,2,2], start:1995, values:[521,576,574,595,612,670,573,571,500,517,581,617,644,637,497,472,527,542,543,554,580,598,644,667,626,1576,1856,1919,1933,2043] },
+];
+
+function buildValues(def) {
+  return years.map(y => {
+    const idx = y - def.start;
+    return (idx < 0 || idx >= def.values.length) ? null : def.values[idx];
+  });
+}
+
+const datasets = stateDefs.map(def => ({
+  label: def.label,
+  stateKey: def.key,
+  data: buildValues(def),
+  borderColor: def.color,
+  backgroundColor: 'transparent',
+  borderWidth: 2,
+  borderDash: def.dash,
+  pointRadius: 1.5,
+  pointHoverRadius: 5,
+  tension: 0.3,
+  spanGaps: false,
+}));
+
+// ── Fullscreen ─────────────────────────────────────────────────────────────
+const fsBtn = document.getElementById('fsBtn');
+const container = document.querySelector('.chart-container');
+
+fsBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    (container.requestFullscreen || container.webkitRequestFullscreen).call(container);
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  }
+});
+
+function onFsChange() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  fsBtn.textContent = isFs ? '✕' : '⛶';
+  fsBtn.title = isFs ? 'Vollbild beenden' : 'Vollbild';
+  // Give browser a tick to relayout, then resize the chart
+  setTimeout(() => {
+    if (isFs) {
+      const availH = window.screen.height - 140; // leave room for legend + title
+      document.getElementById('chartDiv').style.height = availH + 'px';
+    } else {
+      document.getElementById('chartDiv').style.height = '860px';
+    }
+    myChart.resize();
+  }, 80);
+}
+document.addEventListener('fullscreenchange', onFsChange);
+document.addEventListener('webkitfullscreenchange', onFsChange);
+
+const endLabelsPlugin = {
+  id: 'endLabels',
+  afterDraw(chart) {
+    const c = chart.ctx;
+    const xRight = chart.scales.x.right;
+    const MIN_GAP = 12;
+
+    const items = [];
+    chart.data.datasets.forEach((ds, i) => {
+      const meta = chart.getDatasetMeta(i);
+      if (meta.hidden) return;
+      for (let j = ds.data.length - 1; j >= 0; j--) {
+        if (ds.data[j] !== null && ds.data[j] !== undefined && meta.data[j]) {
+          items.push({ label: ds.label, color: ds.borderColor, y: meta.data[j].y });
+          break;
+        }
+      }
+    });
+
+    // Sort top→bottom and spread overlapping labels
+    items.sort((a, b) => a.y - b.y);
+    for (let iter = 0; iter < 30; iter++) {
+      let moved = false;
+      for (let i = 1; i < items.length; i++) {
+        const gap = items[i].y - items[i-1].y;
+        if (gap < MIN_GAP) {
+          const push = (MIN_GAP - gap) / 2;
+          items[i-1].y -= push;
+          items[i].y   += push;
+          moved = true;
+        }
+      }
+      if (!moved) break;
+    }
+
+    c.save();
+    c.font = 'bold 10px Segoe UI, sans-serif';
+    c.textAlign = 'left';
+    items.forEach(item => {
+      c.fillStyle = item.color;
+      c.fillText(item.label, xRight + 8, item.y + 4);
+    });
+    c.restore();
+  }
+};
+
+// ── Custom Tooltip Position – 2/3 unten ───────────────────────────────────
+Chart.Tooltip.positioners.bottomThird = function(elements, eventPosition) {
+  const chart = this.chart;
+  return {
+    x: eventPosition.x,
+    y: chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) * (3 / 4),
+  };
+};
+
+const ctx = document.getElementById('chart').getContext('2d');
+const myChart = new Chart(ctx, {
+  type: 'line',
+  data: { labels: years, datasets },
+  plugins: [endLabelsPlugin],
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: { padding: { right: 145 } },
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: '#ccc',
+          font: { size: 11 },
+          boxWidth: 30,
+          padding: 12,
+          usePointStyle: false,
+          generateLabels(chart) {
+            return chart.data.datasets.map((ds, i) => ({
+              text: ds.label,
+              fillStyle: 'transparent',
+              strokeStyle: ds.borderColor,
+              lineWidth: 2,
+              lineDash: ds.borderDash,
+              hidden: chart.getDatasetMeta(i).hidden,
+              datasetIndex: i,
+              fontColor: ds.borderColor,
+            }));
+          }
+        },
+        onClick(e, item, legend) {
+          const i = item.datasetIndex;
+          const meta = legend.chart.getDatasetMeta(i);
+          meta.hidden = !meta.hidden;
+          legend.chart.update();
+        }
+      },
+      tooltip: {
+        position: 'bottomThird',
+        backgroundColor: '#0f3460ee',
+        titleColor: '#fff',
+        bodyColor: '#ddd',
+        callbacks: {
+          label: ctx => {
+            const v = ctx.raw;
+            if (v === null || v === undefined) return null;
+            return `${ctx.dataset.label}: ${v.toLocaleString('de-DE')} Mio. €`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: '#aaa', maxTicksLimit: 20, font: { size: 11 } },
+        grid: { color: '#ffffff15' }
+      },
+      y: {
+        ticks: {
+          color: '#aaa',
+          font: { size: 11 },
+          callback: v => v.toLocaleString('de-DE') + ' Mio. €'
+        },
+        grid: { color: '#ffffff15' },
+        title: { display: true, text: 'Mio. €', color: '#888', font: { size: 12 } }
+      }
+    }
+  }
+});
+
+// ── Tabelle befüllen ───────────────────────────────────────────────────────
+const volumes = {
+  1950:130,1951:88,1952:113,1953:126,1954:135,1955:277,1956:341,1957:406,1958:489,1959:525,
+  1960:468,1961:732,1962:802,1963:740,1964:778,1965:814,1966:821,1967:889,1968:881,1969:1245,
+  1970:621,1971:659,1972:795,1973:831,1974:977,1975:943,1976:1001,1977:1172,1978:1158,1979:1271,
+  1980:1120,1981:1239,1982:1278,1983:1097,1984:1191,1985:1317,1986:1393,1987:1636,1988:1718,1989:1797,
+  1990:2057,1991:2003,1992:1714,1993:1618,1994:1487,
+  1995:5724,1996:6253,1997:6134,1998:6920,1999:7490,2000:8273,2001:7568,2002:7445,2003:6610,2004:6804,
+  2005:6948,2006:7322,2007:7917,2008:8264,2009:6848,2010:7038,2011:7308,2012:7892,2013:8424,2014:9018,
+  2015:9594,2016:10620,2017:11198,2018:11448,2019:11161,2020:14772,2021:17132,2022:18509,2023:18324,2024:18654
+};
+
+// Order for table columns: BW, BY, HH, HE, NW, BE, BB, HB, MV, NI, RP, SL, SN, ST, SH, TH
+const colOrder = ['BW','BY','HH','HE','NW','BE','BB','HB','MV','NI','RP','SL','SN','ST','SH','TH'];
+const geberSet = new Set(['BW','BY','HH','HE','NW']);
+// Build lookup: key -> array indexed by years
+const lookup = {};
+stateDefs.forEach(def => {
+  lookup[def.key] = buildValues(def);
+});
+
+const tbody = document.getElementById('tableBody');
+years.forEach((yr, yi) => {
+  const tr = document.createElement('tr');
+  // Year cell
+  const tdY = document.createElement('td');
+  tdY.textContent = yr;
+  tr.appendChild(tdY);
+  // State cells
+  colOrder.forEach(key => {
+    const td = document.createElement('td');
+    const v = lookup[key][yi];
+    if (v === null || v === undefined) {
+      td.className = 'num neu';
+      td.textContent = './.';
+    } else {
+      td.className = 'num ' + (v > 0 ? 'nehmer' : v < 0 ? 'geber' : 'zero');
+      td.textContent = (v > 0 ? '+' : '') + v.toLocaleString('de-DE');
+    }
+    tr.appendChild(td);
+  });
+  // Volume cell
+  const tdVol = document.createElement('td');
+  tdVol.className = 'num';
+  tdVol.style.color = '#aaa';
+  tdVol.textContent = volumes[yr] ? '± ' + volumes[yr].toLocaleString('de-DE') : '';
+  tr.appendChild(tdVol);
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
