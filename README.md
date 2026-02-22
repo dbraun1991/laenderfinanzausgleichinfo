@@ -2,7 +2,8 @@
 
 Interaktive Darstellung des deutschen Länderfinanzausgleichs im engeren Sinne als HTML-Einzeldatei – keine Dependencies, kein Build-Prozess, einfach öffnen.
 
-![Preview](preview.png)
+🔗 **Live:** [https://dbraun1991.github.io/laenderfinanzausgleichinfo/](https://dbraun1991.github.io/laenderfinanzausgleichinfo/)
+
 
 ## Features
 
@@ -15,10 +16,12 @@ Interaktive Darstellung des deutschen Länderfinanzausgleichs im engeren Sinne a
 - **Zusammenfassung** der kumulierten Gesamtbeträge aller Geber- und Nehmerländer
 - **Datentabelle** mit allen Jahreswerten, farbcodiert nach individuellem Vorzeichen (nicht nach Kategorie)
 
+
 ## Datenquelle
 
 Wikipedia – [Länderfinanzausgleich](https://de.wikipedia.org/wiki/L%C3%A4nderfinanzausgleich)  
 Ursprungsquelle: Wissenschaftlicher Dienst des Bundestages / Bundesfinanzministerium
+
 
 ## Verwendung
 
@@ -30,6 +33,7 @@ open laenderfinanzausgleich.html
 
 Keine Installation, keine Abhängigkeiten außer einer Internetverbindung für das CDN-Loading von [Chart.js](https://www.chartjs.org/) (v4.4.1).
 
+
 ## Technik
 
 - HTML / CSS / Vanilla JavaScript
@@ -37,6 +41,8 @@ Keine Installation, keine Abhängigkeiten außer einer Internetverbindung für d
 - Custom Chart.js Plugin für End-Labels und Tooltip-Positionierung
 - Fullscreen API (mit webkit-Fallback)
 
+
 ## Lizenz
 
 MIT
+
