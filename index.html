@@ -10,7 +10,13 @@
   h1 { text-align: center; margin-bottom: 6px; font-size: 1.4rem; color: #fff; }
   p.subtitle { text-align: center; color: #aaa; font-size: 0.85rem; margin-bottom: 20px; }
   .chart-container { background: #16213e; border-radius: 12px; padding: 20px 20px 20px 20px; max-width: 1400px; margin: 0 auto; }
-  .legend-hint { text-align: center; margin-top: 16px; font-size: 0.78rem; color: #888; }
+  .legend-hint { text-align: center; margin-top: 16px; font-size: 0.78rem; color: #888; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  #toggleAllBtn {
+    background: #0f3460; border: 1px solid #ffffff30; color: #ccc;
+    border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 0.78rem;
+    transition: background 0.2s, color 0.2s; white-space: nowrap;
+  }
+  #toggleAllBtn:hover { background: #1a4a90; color: #fff; }
   .legend-hint .red { color: #ff6b6b; }
   .legend-hint .green { color: #51cf66; }
   .chart-wrapper { position: relative; }
@@ -63,6 +69,7 @@
     </div>
   </div>
   <div class="legend-hint">
+    <button id="toggleAllBtn" onclick="toggleAll()">Alle ausblenden</button>
     <span class="red">■ Nehmerländer (positive Werte / Empfänger)</span>
     &nbsp;&nbsp;
     <span class="green">■ Geberländer (negative Werte / Zahler)</span>
@@ -231,6 +238,17 @@ const datasets = stateDefs.map(def => ({
   tension: 0.3,
   spanGaps: false,
 }));
+
+// ── Alle / Keine Toggle ────────────────────────────────────────────────────
+let allVisible = true;
+function toggleAll() {
+  allVisible = !allVisible;
+  myChart.data.datasets.forEach((_, i) => {
+    myChart.getDatasetMeta(i).hidden = !allVisible;
+  });
+  myChart.update('none');
+  document.getElementById('toggleAllBtn').textContent = allVisible ? 'Alle ausblenden' : 'Alle einblenden';
+}
 
 // ── Fullscreen ─────────────────────────────────────────────────────────────
 const fsBtn = document.getElementById('fsBtn');
